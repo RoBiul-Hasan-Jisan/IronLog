@@ -11,17 +11,20 @@ import { ExerciseMedia } from "@/components/ExerciseMedia";
 import { Icon } from "@/components/icons";
 import { Plate } from "@/components/Plate";
 import { SetTimer } from "@/components/SetTimer";
+import { CustomExerciseView } from "@/components/CustomExerciseView";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  if (id.startsWith("c_")) return { title: "Exercise" };
   const ex = getExercise(id);
   return { title: ex ? titleCase(ex.name) : "Exercise not found" };
 }
 
 export default async function ExercisePage({ params }: Props) {
   const { id } = await params;
+  if (id.startsWith("c_")) return <CustomExerciseView id={id} />;
   const ex = getExercise(id);
   if (!ex) return notFound();
 

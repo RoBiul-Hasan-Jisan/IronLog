@@ -7,6 +7,7 @@ import { titleCase } from "@/lib/format";
 import { ExerciseCard } from "./ExerciseCard";
 import { Icon } from "./icons";
 import { Plate } from "./Plate";
+import { customToSummary, useOverlay } from "@/lib/useOverlay";
 
 const PAGE_SIZE = 24;
 const TOP_EQUIPMENT = 8;
@@ -103,12 +104,19 @@ function FilterPanel({
 }
 
 export function ExerciseBrowser({
-  index,
+  index: bundled,
   initialFilters = EMPTY_FILTERS,
 }: {
   index: ExerciseSummary[];
   initialFilters?: Filters;
 }) {
+  const overlay = useOverlay();
+  // Library exercises an admin hid are dropped; custom ones are added.
+  const index = useMemo(() => {
+    const hidden = new Set(overlay.hidden);
+    const base = hidden.size > 0 ? bundled.filter((e) => !hidden.has(e.id)) : bundled;
+    return overlay.custom.length > 0 ? [...overlay.custom.map(customToSummary), ...base] : base;
+  }, [bundled, overlay]);
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [limit, setLimit] = useState(PAGE_SIZE);
 

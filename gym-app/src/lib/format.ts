@@ -38,6 +38,8 @@ export function gifPathFor(imagePath: string): string {
 
 /** Resolves a library-relative media path to a URL. */
 export function mediaUrl(path: string): string {
+  // Custom exercises added by an admin carry full URLs.
+  if (/^https?:\/\//i.test(path)) return path;
   const base = (process.env.NEXT_PUBLIC_MEDIA_BASE || DEFAULT_MEDIA_BASE).replace(/\/+$/, "");
   return `${base}/${path.replace(/^\/+/, "")}`;
 }

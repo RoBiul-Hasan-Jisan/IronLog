@@ -8,6 +8,7 @@ import {
   completeSet,
   endRest,
   initialState,
+  loggedExercises,
   playable,
   previousExercise,
   skipExercise,
@@ -17,6 +18,8 @@ import {
 } from "@/lib/player";
 import { describePrescription, estimateWorkoutSeconds } from "@/lib/prescription";
 import { formatDuration, titleCase } from "@/lib/format";
+import { api } from "@/lib/api";
+import { useAuth } from "./AuthProvider";
 import { ExerciseMedia } from "./ExerciseMedia";
 import { Icon } from "./icons";
 import { Plate } from "./Plate";
@@ -84,6 +87,8 @@ function Session({
   const [elapsed, setElapsed] = useState(0);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const prev = useRef<PlayerState>(state);
+  const { status } = useAuth();
+  const logged = useRef(false);
 
   useWakeLock();
 
@@ -96,6 +101,18 @@ function Session({
     }, 1000);
     return () => window.clearInterval(id);
   }, [paused, state.phase, items]);
+
+  // Signed-in members get the finished workout added to their history.
+  useEffect(() => {
+    if (state.phase !== "done" || logged.current || status !== "authenticated") return;
+    const exercises = loggedExercises(items, state.completedSets, (id) => titleCase(details[id]?.name ?? "Exercise"));
+    if (exercises.length === 0) return;
+    logged.current = true;
+    void api("/me/workout-logs", { method: "POST", body: { durationSec: elapsed, exercises } }).catch(() => {
+      logged.current = false;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.phase, status]);
 
   // Sounds: 3-2-1 countdown beeps, a long beep when a phase changes, a jingle at the end.
   useEffect(() => {

@@ -127,3 +127,23 @@ export function progress(items: WorkoutItem[], s: PlayerState): number {
   const total = totalSets(items);
   return total === 0 ? 1 : Math.min(1, s.completedSets / total);
 }
+
+/**
+ * Which exercises (and how many sets of each) a finished or abandoned session counts as,
+ * for the workout history. Completed sets are handed out in workout order.
+ */
+export function loggedExercises(
+  items: WorkoutItem[],
+  completedSets: number,
+  nameOf: (exerciseId: string) => string,
+): { exerciseId: string; name: string; sets: number }[] {
+  let left = Math.max(0, completedSets);
+  const out: { exerciseId: string; name: string; sets: number }[] = [];
+  for (const it of items) {
+    if (left <= 0) break;
+    const sets = Math.min(it.sets, left);
+    left -= sets;
+    if (sets > 0) out.push({ exerciseId: it.exerciseId, name: nameOf(it.exerciseId), sets });
+  }
+  return out;
+}
