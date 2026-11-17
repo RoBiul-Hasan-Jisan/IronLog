@@ -1,84 +1,120 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { exerciseIndex } from "@/lib/data";
-import { buildFacets } from "@/lib/search";
-import { estimateWorkoutSeconds } from "@/lib/prescription";
-import { PRESETS, generateWorkout } from "@/lib/workouts";
+import { ClassTimetable } from "@/components/ClassTimetable";
+import { Faq } from "@/components/Faq";
+import { NextClasses } from "@/components/NextClasses";
+import { PlansPreview } from "@/components/PlansPreview";
 import { Plate } from "@/components/Plate";
-import { SessionCard, type SessionPreview } from "@/components/SessionCard";
+import { TrainerCards } from "@/components/TrainerCards";
+import { exerciseIndex } from "@/lib/data";
+import { GYM } from "@/lib/gym";
 
-// Sessions are re-picked each day, so this page must be rendered per request.
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: { absolute: `${GYM.name}: classes, coaching and training tools` },
+  description: `${GYM.tagline} Group classes, expert trainers, a guided workout library and progress tracking.`,
+};
 
-function todaysSessions(): SessionPreview[] {
-  const day = Number(new Date().toISOString().slice(0, 10).replace(/-/g, ""));
-  const byId = new Map(exerciseIndex.map((e) => [e.id, e]));
+const FEATURES = [
+  { title: "Group classes", text: "Strength, HIIT, yoga, boxing and cycling every day. Book your spot online and cancel up to 2 hours before.", href: "/classes", cta: "See timetable" },
+  { title: "Expert coaches", text: "Qualified trainers for beginners and lifters alike, from technique coaching to one-to-one programmes.", href: "/trainers", cta: "Meet the team" },
+  { title: "Guided workout library", text: `${exerciseIndex.length.toLocaleString()} exercises with animations, numbered steps and timers. Build a session and follow it on your phone.`, href: "/train", cta: "Open the library" },
+  { title: "Track your progress", text: "Log weight and measurements, see charts, and keep a history of every workout you finish.", href: "/progress", cta: "See how it works" },
+  { title: "Fast check-in", text: "Show your personal code at the front desk. We track your visits and your weekly streak.", href: "/register", cta: "Create account" },
+  { title: "Gym shop", text: "Supplements, gear and apparel, ready to collect at the front desk or delivered.", href: "/shop", cta: "Visit the shop" },
+];
 
-  return PRESETS.map((preset, i) => {
-    const items = generateWorkout(exerciseIndex, preset, day + i * 997);
-    const exercises = items.flatMap((it) => {
-      const ex = byId.get(it.exerciseId);
-      return ex ? [{ id: ex.id, name: ex.name, image: ex.image, bodyPart: ex.bodyPart }] : [];
-    });
-    return {
-      id: preset.id,
-      title: preset.title,
-      subtitle: preset.subtitle,
-      items,
-      exercises,
-      minutes: Math.max(1, Math.round(estimateWorkoutSeconds(items) / 60)),
-      sets: items.reduce((sum, it) => sum + it.sets, 0),
-      bodyParts: [...new Set(exercises.map((e) => e.bodyPart))],
-    };
-  });
-}
-
-export default function HomePage() {
-  const bodyParts = buildFacets(exerciseIndex).bodyParts;
-  const sessions = todaysSessions();
-
+export default function Landing() {
   return (
-    <div>
-      <header>
-        <h1 className="page-title">What are we training today?</h1>
-        <p className="page-sub">
-          Choose a muscle group to see its exercises, or start one of today&apos;s sessions below. Every exercise comes
-          with an animation, the steps, and how long it takes.
-        </p>
-      </header>
-
-      <ul className="plate-grid" aria-label="Muscle groups">
-        {bodyParts.map((bp) => (
-          <li key={bp.name}>
-            <Link href={`/exercises?bodyPart=${encodeURIComponent(bp.name)}`} className="plate-link">
-              <Plate bodyPart={bp.name} size={40} hole="var(--paper)" />
-              <span>
-                <span className="plate-link-name">{bp.name}</span>
-                <span className="plate-link-count">{bp.count} exercises</span>
-              </span>
+    <>
+      <section className="hero">
+        <div className="hero-copy">
+          <p className="hero-eyebrow">
+            <Plate bodyPart="chest" size={18} hole="var(--paper)" />
+            Open 7 days a week
+          </p>
+          <h1 className="hero-title">{GYM.tagline}</h1>
+          <p className="hero-text">
+            Group classes, real coaches and a training app that shows you exactly what to do, how many sets, and how long to rest. Everything in one membership.
+          </p>
+          <div className="hero-cta">
+            <Link href="/register" className="btn btn--primary btn--lg">
+              Join now
             </Link>
-          </li>
-        ))}
-      </ul>
-
-      <section className="section" aria-labelledby="sessions">
-        <div className="section-head">
-          <h2 id="sessions" className="h2">
-            Today&apos;s sessions
-          </h2>
-          <p>New picks every day. Start as they are, or change anything first.</p>
+            <Link href="/contact" className="btn btn--secondary btn--lg">
+              Book a free trial
+            </Link>
+          </div>
+          <ul className="hero-points">
+            <li>No joining fee on any plan</li>
+            <li>Cancel classes online</li>
+            <li>Beginner friendly</li>
+          </ul>
         </div>
-        <ul className="sessions">
-          {sessions.map((s) => (
-            <SessionCard key={s.id} session={s} />
+        <NextClasses />
+      </section>
+
+      <section className="pub-section" aria-labelledby="why">
+        <h2 id="why" className="pub-h2">
+          Everything you need to train properly
+        </h2>
+        <ul className="features">
+          {FEATURES.map((f) => (
+            <li key={f.title} className="feature">
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+              <Link href={f.href}>{f.cta} →</Link>
+            </li>
           ))}
         </ul>
       </section>
 
-      <section className="section" style={{ textAlign: "center" }}>
-        <Link href="/exercises" className="btn btn--secondary btn--lg">
-          Browse all {exerciseIndex.length.toLocaleString()} exercises
+      <section className="pub-section pub-section--tint" aria-labelledby="classes">
+        <div className="pub-head">
+          <h2 id="classes" className="pub-h2">
+            This week&apos;s classes
+          </h2>
+          <Link href="/classes" className="btn btn--secondary">
+            Full timetable
+          </Link>
+        </div>
+        <ClassTimetable days={3} limit={8} filters={false} />
+      </section>
+
+      <section className="pub-section" aria-labelledby="plans">
+        <div className="pub-head">
+          <h2 id="plans" className="pub-h2">
+            Simple memberships
+          </h2>
+        </div>
+        <PlansPreview />
+      </section>
+
+      <section className="pub-section pub-section--tint" aria-labelledby="team">
+        <div className="pub-head">
+          <h2 id="team" className="pub-h2">
+            Your coaches
+          </h2>
+          <Link href="/trainers" className="btn btn--secondary">
+            Everyone on the team
+          </Link>
+        </div>
+        <TrainerCards limit={4} />
+      </section>
+
+      <section className="pub-section" aria-labelledby="faq">
+        <h2 id="faq" className="pub-h2">
+          Questions, answered
+        </h2>
+        <Faq />
+      </section>
+
+      <section className="cta-band">
+        <h2>Ready for your first session?</h2>
+        <p>Visit us for a free trial: a tour, a short intro workout and a plan that fits you.</p>
+        <Link href="/contact" className="btn btn--primary btn--lg">
+          Book a free trial
         </Link>
       </section>
-    </div>
+    </>
   );
 }

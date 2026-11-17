@@ -3,7 +3,10 @@ import { Archivo, Archivo_Narrow } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
+import { AuthProvider } from "@/components/AuthProvider";
+import { CartProvider } from "@/components/CartProvider";
 import { WorkoutProvider } from "@/components/WorkoutProvider";
+import { WorkoutSync } from "@/components/WorkoutSync";
 
 // Archivo for reading text, its narrow cut for headlines and big numbers.
 const body = Archivo({ subsets: ["latin"], variable: "--font-archivo", display: "swap" });
@@ -30,9 +33,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${body.variable} ${display.variable}`}>
       <body>
-        <WorkoutProvider>
-          <AppShell>{children}</AppShell>
-        </WorkoutProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WorkoutProvider>
+              <WorkoutSync />
+              <AppShell>{children}</AppShell>
+            </WorkoutProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

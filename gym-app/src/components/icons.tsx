@@ -18,7 +18,13 @@ export type IconName =
   | "skipForward"
   | "skipBack"
   | "x"
-  | "filter";
+  | "filter"
+  | "bag"
+  | "user"
+  | "shield"
+  | "calendar"
+  | "qr"
+  | "chart";
 
 const PATHS: Record<IconName, ReactNode> = {
   home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -49,6 +55,22 @@ const PATHS: Record<IconName, ReactNode> = {
   skipBack: <path d="M19 5 9 12l10 7zM5 5v14" />,
   x: <path d="M6 6l12 12M18 6 6 18" />,
   filter: <path d="M4 6h16M7 12h10M10 18h4" />,
+  bag: <path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" />,
+  user: (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="4" y="5" width="16" height="16" rx="2" />
+      <path d="M4 10h16M8 3v4M16 3v4" />
+    </>
+  ),
+  qr: <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v6h-6" />,
+  chart: <path d="M4 20V4M4 20h16M8 16l4-5 3 3 5-7" />,
+  shield: <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" />,
 };
 
 /** Small stroke icon set. Decorative by default — put the label on the button. */
